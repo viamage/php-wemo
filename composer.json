@@ -1,0 +1,27 @@
+{
+  "name": "a15lam/php-wemo",
+  "description": "PHP library for Wemo devices.",
+  "homepage": "https://github.com/a15lam/php-wemo",
+  "keywords": [
+    "Wemo",
+    "Soap",
+    "php-wemo"
+  ],
+  "license": [
+    "Apache-2.0"
+  ],
+  "authors": [
+    {
+      "name": "Arif Islam",
+      "email": "areef.islam@gmail.com"
+    }
+  ],
+  "require": {
+    "php": ">=5.5"
+  },
+  "autoload": {
+    "psr-4": {
+      "a15lam\\PhpWemo\\": "src/"
+    }
+  }
+}
