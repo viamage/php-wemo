@@ -3,14 +3,28 @@ namespace a15lam\PhpWemo;
 
 class WemoClient
 {
+    const FORMAT_XML = 1;
+
+    const FORMAT_ARRAY = 2;
+
+    const FORMAT_JSON = 3;
+
     protected $ip = null;
 
     protected $port = null;
 
-    public function __construct($ip, $port = '49153')
+    protected $output = null;
+
+    public function __construct($ip, $port = Config::PORT)
     {
         $this->ip = $ip;
         $this->port = $port;
+        $this->setOutput(static::FORMAT_ARRAY);
+    }
+
+    public function setOutput($output)
+    {
+        $this->output = $output;
     }
 
     public function info($url)
@@ -25,8 +39,9 @@ class WemoClient
 
         $ch = curl_init();
         curl_setopt_array($ch, $options);
+        $response = curl_exec($ch);
 
-        return static::xmlToArray(curl_exec($ch));
+        return $this->formatResponse($response);
     }
 
     public function request($controlUrl, $service, $method, $arguments = [])
@@ -50,23 +65,40 @@ class WemoClient
 
         $xml = $xmlHeader . $xmlBody . $xmlFooter;
 
-        $options = [
-            CURLOPT_URL            => $url,
-            CURLOPT_POST           => true,
-            CURLOPT_PORT           => $this->port,
-            CURLOPT_POSTFIELDS     => $xml,
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_VERBOSE        => false,
-            CURLOPT_HTTPHEADER     => [
-                'Content-Type:text/xml',
-                'SOAPACTION:"' . $action . '"'
-            ]
-        ];
+        try {
+            $options = [
+                CURLOPT_URL            => $url,
+                CURLOPT_POST           => true,
+                CURLOPT_PORT           => $this->port,
+                CURLOPT_POSTFIELDS     => $xml,
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_VERBOSE        => false,
+                CURLOPT_HTTPHEADER     => [
+                    'Content-Type:text/xml',
+                    'SOAPACTION:"' . $action . '"'
+                ]
+            ];
 
-        $ch = curl_init();
-        curl_setopt_array($ch, $options);
+            $ch = curl_init();
+            curl_setopt_array($ch, $options);
+            $response = curl_exec($ch);
+        } catch (\Exception $e){
+            throw $e;
+        }
 
-        return curl_exec($ch);
+        return $this->formatResponse($response);
+    }
+
+    protected function formatResponse($response)
+    {
+        if(static::FORMAT_ARRAY === $this->output){
+            $response = static::xmlToArray($response);
+        } else if(static::FORMAT_JSON === $this->output){
+            $response = static::xmlToArray($response);
+            $response = json_encode($response, JSON_UNESCAPED_SLASHES);
+        }
+
+        return $response;
     }
 
     /**

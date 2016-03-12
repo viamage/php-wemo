@@ -1,14 +1,21 @@
 <?php
+include_once('Config.php');
 include_once('WemoClient.php');
-use a15lam\PhpWemo\WemoClient;
+include_once('Devices/BaseDevice.php');
+include_once('Devices/Bridge.php');
+include_once('Contracts/DeviceInterface.php');
+include_once('Devices/Bulb.php');
 
-$wc = new WemoClient('192.168.1.69');
-$rs = $wc->info('setup.xml');
-//$rs = $wc->request(
-//    'upnp/control/bridge1',
-//    'urn:Belkin:service:bridge:1',
-//    'SetDeviceStatus',
-//    ['DeviceStatusList' => '&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;&lt;DeviceStatusList&gt;&lt;DeviceStatus&gt;&lt;IsGroupAction&gt;NO&lt;/IsGroupAction&gt;&lt;DeviceID
-//available=&quot;YES&quot;&gt;B4750E1B95783E51&lt;/DeviceID&gt;&lt;CapabilityID&gt;10006,10008,30008,30009,3000A&lt;/CapabilityID&gt;&lt;CapabilityValue&gt;0,0:0,,,&lt;/CapabilityValue&gt;&lt;LastEventTimeStamp&gt;0&lt;/LastEventTimeStamp&gt;&lt;/DeviceStatus&gt;&lt;/DeviceStatusList&gt;']
-//);
-print print_r($rs);
+
+$bridge = new \a15lam\PhpWemo\Devices\Bridge('192.168.1.69');
+$bulb1 = new \a15lam\PhpWemo\Devices\Bulb($bridge, 'Media room 1');
+$bulb2 = new \a15lam\PhpWemo\Devices\Bulb($bridge, 'Media room 2');
+
+$bulb1->On();
+sleep(2);
+$bulb2->On();
+sleep(2);
+$bulb1->Off();
+sleep(2);
+$bulb2->Off();
+
