@@ -2,9 +2,12 @@
 namespace a15lam\PhpWemo\Devices;
 
 use a15lam\PhpWemo\Contracts\DeviceInterface;
+use a15lam\PhpWemo\Traits\Dimmable;
 
 class Bulb extends  BaseDevice implements DeviceInterface
 {
+    use Dimmable;
+
     protected $bridge = null;
 
     protected $deviceId = null;
