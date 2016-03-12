@@ -8,4 +8,5 @@ Currently supports...
  
 Next to support...
 
-1. Wemo light bulb group - on/off/dimming
+1. Device discovery.
+2. Wemo light bulb group - on/off/dimming

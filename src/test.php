@@ -1,14 +1,5 @@
 <?php
-include_once('Config.php');
-include_once('WemoClient.php');
-include_once('Devices/BaseDevice.php');
-include_once('Devices/Bridge.php');
-include_once('Contracts/DeviceInterface.php');
-include_once('Traits/Dimmable.php');
-include_once('Devices/WemoBulb.php');
-include_once('Devices/LightSwitch.php');
-include_once('Devices/WemoSwitch.php');
-
+include('../vendor/autoload.php');
 
 $bridge = new \a15lam\PhpWemo\Devices\Bridge('192.168.1.69');
 $bulb1 = new \a15lam\PhpWemo\Devices\WemoBulb($bridge, 'media room 1');
