@@ -2,7 +2,6 @@
 
 namespace a15lam\PhpWemo\Devices;
 
-use a15lam\PhpWemo\Config;
 use a15lam\PhpWemo\WemoClient;
 
 class Bridge extends BaseDevice
@@ -22,13 +21,6 @@ class Bridge extends BaseDevice
             'SCPDURL'     => '/bridgeservice.xml'
         ]
     ];
-
-    public function __construct($ip, $port = Config::PORT)
-    {
-        $this->ip = $ip;
-        $this->port = $port;
-        $this->client = new WemoClient($this->ip);
-    }
 
     public function setPort($port)
     {
@@ -76,15 +68,15 @@ class Bridge extends BaseDevice
 
     public function bulbOn($deviceId)
     {
-        return ($this->setBulbState($deviceId, '255'))? '1' : false;
+        return ($this->setDeviceStatus($deviceId, '255'))? '1' : false;
     }
 
     public function bulbOff($deviceId)
     {
-        return ($this->setBulbState($deviceId, '0'))? '0' : false;
+        return ($this->setDeviceStatus($deviceId, '0'))? '0' : false;
     }
 
-    public function setBulbState($deviceId, $level)
+    public function setDeviceStatus($deviceId, $level)
     {
         $service = $this->services['BridgeService']['serviceType'];
         $controlUrl = $this->services['BridgeService']['controlURL'];
