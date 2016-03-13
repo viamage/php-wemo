@@ -15,10 +15,10 @@ class WemoClient
 
     protected $output = null;
 
-    public function __construct($ip, $port = Config::PORT)
+    public function __construct($ip, $port = null)
     {
         $this->ip = $ip;
-        $this->port = $port;
+        $this->port = (!empty($port))? $port : Config::get('port');
         $this->setOutput(static::FORMAT_ARRAY);
     }
 

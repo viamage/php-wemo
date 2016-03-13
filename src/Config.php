@@ -3,17 +3,15 @@ namespace a15lam\PhpWemo;
 
 class Config
 {
-    const PORT = '49153';
-
-    private static $config = [
-        'port' => Config::PORT
-    ];
-
     public static function get($key, $default = null)
     {
-        if(isset(static::$config[$key])){
-            return static::$config[$key];
+        $key = strtolower($key);
+        $config = include __DIR__.'/../config.php';
+
+        if(array_key_exists($key, $config)){
+            return $config[$key];
+        } else {
+            return $default;
         }
-        return $default;
     }
 }

@@ -2,6 +2,7 @@
 
 namespace a15lam\PhpWemo\Devices;
 
+use a15lam\PhpWemo\Discovery;
 use a15lam\PhpWemo\WemoClient;
 use a15lam\PhpWemo\Config;
 
@@ -15,10 +16,10 @@ class BaseDevice
 
     protected $services = [];
 
-    public function __construct($ip, $port = Config::PORT)
+    public function __construct($id, $port = null)
     {
-        $this->ip = $ip;
-        $this->port = $port;
+        $this->ip = (static::isIp($id))? $id : static::getDeviceIpById($id);
+        $this->port = (!empty($port))? $port : Config::get('port');
         $this->client = new WemoClient($this->ip);
     }
 
@@ -48,5 +49,34 @@ class BaseDevice
         } catch (\Exception $e){
             throw new \Exception('Failed to unwrap response. '.$e->getMessage().' Response: '.print_r($response, true));
         }
+    }
+
+    protected static function isIp($ip)
+    {
+        $segments = explode('.', $ip);
+
+        if(count($segments) === 4){
+            foreach($segments as $segment){
+                if(!is_numeric($segment)){
+                    return false;
+                }
+            }
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    protected static function getDeviceIpById($id)
+    {
+        $devices = Discovery::find();
+
+        foreach($devices as $device){
+            if($id === $device['id']){
+                return $device['ip'];
+            }
+        }
+
+        throw new \Exception('Invalid device id supplied. No device found by id '.$id);
     }
 }
