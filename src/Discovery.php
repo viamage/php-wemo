@@ -2,6 +2,8 @@
 namespace a15lam\PhpWemo;
 
 use a15lam\PhpWemo\Devices\Bridge;
+use a15lam\PhpWemo\Devices\LightSwitch;
+use a15lam\PhpWemo\Devices\WemoSwitch;
 use Clue\React\Ssdp\Client;
 use React\EventLoop\Factory;
 
@@ -75,6 +77,11 @@ class Discovery
                 }
 
                 $data['device'] = $devices;
+                $data['class_name'] = Bridge::class;
+            } else if(static::isLightSwitch($info['UDN'])){
+                $data['class_name'] = LightSwitch::class;
+            } else if(static::isWemoSwitch($info['UDN'])){
+                $data['class_name'] = WemoSwitch::class;
             }
 
             $infos[] = $data;
