@@ -23,6 +23,11 @@ class BaseDevice
         $this->client = new WemoClient($this->ip);
     }
 
+    public function info($resource = 'setup.xml')
+    {
+        return $this->client->info($resource);
+    }
+
     public function getUDN()
     {
         $device = static::lookupDevice('ip', $this->ip);
