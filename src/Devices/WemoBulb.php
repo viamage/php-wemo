@@ -21,8 +21,14 @@ class WemoBulb implements DeviceInterface
         if(!empty($deviceId)){
             $this->deviceId = $deviceId;
         } else if(!empty($deviceName)) {
-            $this->deviceId = $this->bridge->getDeviceIdByFriendlyName($deviceName);
-        } else {
+            $this->deviceId = $this->bridge->getDeviceIdByCustomId($deviceName);
+
+            if(empty($this->deviceId)) {
+                $this->deviceId = $this->bridge->getDeviceIdByFriendlyName($deviceName);
+            }
+        }
+
+        if(empty($this->deviceId)){
             throw new \Exception('No device name or id provided.');
         }
     }

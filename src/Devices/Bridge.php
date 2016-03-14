@@ -22,22 +22,13 @@ class Bridge extends BaseDevice
         ]
     ];
 
-    public function setPort($port)
-    {
-        $this->port = $port;
-    }
-
-    public function getUDN()
-    {
-        $rs = $this->client->info('setup.xml');
-
-        if (is_array($rs) && isset($rs['root'])) {
-            return $rs['root']['device']['UDN'];
-        }
-    }
-
     public function getPairedDevices()
     {
+        $device = self::lookupDevice('ip', $this->ip);
+        if(isset($device['device']) && is_array($device['device'])){
+            return $device['device'];
+        }
+
         $service = $this->services['BridgeService']['serviceType'];
         $controlUrl = $this->services['BridgeService']['controlURL'];
         $method = 'GetEndDevices';
@@ -53,6 +44,19 @@ class Bridge extends BaseDevice
         return $rs['DeviceLists']['DeviceList']['DeviceInfos']['DeviceInfo'];
     }
 
+    public function getDeviceIdByCustomId($id)
+    {
+        $devices = $this->getPairedDevices();
+
+        foreach ($devices as $device) {
+            if (strtolower($device['id']) === strtolower($id)) {
+                return $device['DeviceID'];
+            }
+        }
+
+        return null;
+    }
+
     public function getDeviceIdByFriendlyName($name)
     {
         $devices = $this->getPairedDevices();
@@ -63,7 +67,7 @@ class Bridge extends BaseDevice
             }
         }
 
-        throw new \Exception('No device found by name ' . $name);
+        return null;
     }
 
     public function bulbOn($deviceId)

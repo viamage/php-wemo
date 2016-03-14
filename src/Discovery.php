@@ -1,6 +1,7 @@
 <?php
 namespace a15lam\PhpWemo;
 
+use a15lam\PhpWemo\Devices\Bridge;
 use Clue\React\Ssdp\Client;
 use React\EventLoop\Factory;
 
@@ -50,7 +51,7 @@ class Discovery
             $wc = new WemoClient($ip);
             $info = $wc->info('setup.xml');
             $info = $info['root']['device'];
-            $infos[] = [
+            $data = [
                 'id'           => str_replace(' ', '_', strtolower($info['friendlyName'])),
                 'ip'           => $ip,
                 'deviceType'   => $info['deviceType'],
@@ -58,6 +59,20 @@ class Discovery
                 'modelName'    => $info['modelName'],
                 'UDN'          => $info['UDN']
             ];
+
+            if(static::isBridge($info['UDN'])){
+                $bridge = new Bridge($ip);
+                $devices = $bridge->getPairedDevices();
+
+                foreach($devices as $i => $device){
+                    $device['id'] = str_replace(' ', '_', strtolower($device['FriendlyName']));
+                    $devices[$i] = $device;
+                }
+
+                $data['device'] = $devices;
+            }
+
+            $infos[] = $data;
         }
 
         return $infos;
@@ -91,5 +106,26 @@ class Discovery
         } catch (\Exception $e){
             return null;
         }
+    }
+
+    protected static function isBridge($udn){
+        if(strpos($udn, 'uuid:Bridge-1') !== false){
+            return true;
+        }
+        return false;
+    }
+
+    protected static function isLightSwitch($udn){
+        if(strpos($udn, 'uuid:Lightswitch-1') !== false){
+            return true;
+        }
+        return false;
+    }
+
+    protected static function isWemoSwitch($udn){
+        if(strpos($udn, 'uuid:Socket-1') !== false){
+            return true;
+        }
+        return false;
     }
 }

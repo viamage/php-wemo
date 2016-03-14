@@ -23,6 +23,22 @@ class BaseDevice
         $this->client = new WemoClient($this->ip);
     }
 
+    public function getUDN()
+    {
+        $device = static::lookupDevice('ip', $this->ip);
+        if(isset($device['UDN'])){
+            return $device['UDN'];
+        }
+
+        $rs = $this->client->info('setup.xml');
+
+        if (is_array($rs) && isset($rs['root'])) {
+            return $rs['root']['device']['UDN'];
+        }
+
+        throw new \Exception('UDN not found for device with ip address '.$this->ip);
+    }
+
     protected function setBinaryState($state)
     {
         $service = $this->services['BridgeService']['serviceType'];
@@ -69,14 +85,23 @@ class BaseDevice
 
     protected static function getDeviceIpById($id)
     {
+        $device = static::lookupDevice('id', $id);
+        if(isset($device['ip'])){
+            return $device['ip'];
+        }
+        throw new \Exception('Invalid device id supplied. No device found by id '.$id);
+    }
+
+    protected static function lookupDevice($key, $value)
+    {
         $devices = Discovery::find();
 
         foreach($devices as $device){
-            if($id === $device['id']){
-                return $device['ip'];
+            if($value === $device[$key]){
+                return $device;
             }
         }
 
-        throw new \Exception('Invalid device id supplied. No device found by id '.$id);
+        throw new \Exception('Device not found for '.$key.' = '.$value);
     }
 }
