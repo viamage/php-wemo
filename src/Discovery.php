@@ -49,6 +49,29 @@ class Discovery
         return $devices;
     }
 
+    public static function getBaseDeviceById($id)
+    {
+        $device = static::lookupDevice('id', $id);
+        if(isset($device['class_name'])){
+            $class = $device['class_name'];
+            return new $class($id);
+        }
+        throw new \Exception('Invalid device id supplied. No base device found by id '.$id);
+    }
+
+    public static function lookupDevice($key, $value)
+    {
+        $devices = static::find();
+
+        foreach($devices as $device){
+            if($value === $device[$key]){
+                return $device;
+            }
+        }
+
+        throw new \Exception('Device not found for '.$key.' = '.$value);
+    }
+
     protected static function getDeviceInfo($devices)
     {
         $infos = [];
@@ -76,8 +99,8 @@ class Discovery
                     $devices[$i] = $device;
                 }
 
-                $data['device'] = $devices;
                 $data['class_name'] = Bridge::class;
+                $data['device'] = $devices;
             } else if(static::isLightSwitch($info['UDN'])){
                 $data['class_name'] = LightSwitch::class;
             } else if(static::isWemoSwitch($info['UDN'])){

@@ -2,6 +2,7 @@
 
 namespace a15lam\PhpWemo\Devices;
 
+use a15lam\PhpWemo\Discovery;
 use a15lam\PhpWemo\WemoClient;
 
 class Bridge extends BaseDevice
@@ -25,7 +26,7 @@ class Bridge extends BaseDevice
     public function getPairedDevices($refresh = false)
     {
         if($refresh === false) {
-            $device = self::lookupDevice('ip', $this->ip);
+            $device = Discovery::lookupDevice('ip', $this->ip);
             if (isset($device['device']) && is_array($device['device'])) {
                 return $device['device'];
             }

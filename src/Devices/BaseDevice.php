@@ -31,7 +31,7 @@ class BaseDevice
     public function getUDN($refresh = false)
     {
         if($refresh === false) {
-            $device = static::lookupDevice('ip', $this->ip);
+            $device = Discovery::lookupDevice('ip', $this->ip);
             if (isset($device['UDN'])) {
                 return $device['UDN'];
             }
@@ -92,23 +92,10 @@ class BaseDevice
 
     protected static function getDeviceIpById($id)
     {
-        $device = static::lookupDevice('id', $id);
+        $device = Discovery::lookupDevice('id', $id);
         if(isset($device['ip'])){
             return $device['ip'];
         }
         throw new \Exception('Invalid device id supplied. No device found by id '.$id);
-    }
-
-    protected static function lookupDevice($key, $value)
-    {
-        $devices = Discovery::find();
-
-        foreach($devices as $device){
-            if($value === $device[$key]){
-                return $device;
-            }
-        }
-
-        throw new \Exception('Device not found for '.$key.' = '.$value);
     }
 }
