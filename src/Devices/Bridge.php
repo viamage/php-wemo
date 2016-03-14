@@ -2,6 +2,7 @@
 
 namespace a15lam\PhpWemo\Devices;
 
+use a15lam\PhpWemo\Discovery;
 use a15lam\PhpWemo\WemoClient;
 
 class Bridge extends BaseDevice
@@ -22,27 +23,20 @@ class Bridge extends BaseDevice
         ]
     ];
 
-    public function setPort($port)
+    public function getPairedDevices($refresh = false)
     {
-        $this->port = $port;
-    }
-
-    public function getUDN()
-    {
-        $rs = $this->client->info('setup.xml');
-
-        if (is_array($rs) && isset($rs['root'])) {
-            return $rs['root']['device']['UDN'];
+        if($refresh === false) {
+            $device = Discovery::lookupDevice('ip', $this->ip);
+            if (isset($device['device']) && is_array($device['device'])) {
+                return $device['device'];
+            }
         }
-    }
 
-    public function getPairedDevices()
-    {
         $service = $this->services['BridgeService']['serviceType'];
         $controlUrl = $this->services['BridgeService']['controlURL'];
         $method = 'GetEndDevices';
         $arguments = [
-            'DevUDN'      => $this->getUDN(),
+            'DevUDN'      => $this->getUDN($refresh),
             'ReqListType' => 'PAIRED_LIST'
         ];
 
@@ -51,6 +45,19 @@ class Bridge extends BaseDevice
         $rs = WemoClient::xmlToArray($rs['u:GetEndDevicesResponse']['DeviceLists']);
 
         return $rs['DeviceLists']['DeviceList']['DeviceInfos']['DeviceInfo'];
+    }
+
+    public function getDeviceIdByCustomId($id)
+    {
+        $devices = $this->getPairedDevices();
+
+        foreach ($devices as $device) {
+            if (strtolower($device['id']) === strtolower($id)) {
+                return $device['DeviceID'];
+            }
+        }
+
+        return null;
     }
 
     public function getDeviceIdByFriendlyName($name)
@@ -63,7 +70,7 @@ class Bridge extends BaseDevice
             }
         }
 
-        throw new \Exception('No device found by name ' . $name);
+        return null;
     }
 
     public function bulbOn($deviceId)

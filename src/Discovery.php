@@ -1,6 +1,9 @@
 <?php
 namespace a15lam\PhpWemo;
 
+use a15lam\PhpWemo\Devices\Bridge;
+use a15lam\PhpWemo\Devices\LightSwitch;
+use a15lam\PhpWemo\Devices\WemoSwitch;
 use Clue\React\Ssdp\Client;
 use React\EventLoop\Factory;
 
@@ -8,24 +11,66 @@ class Discovery
 {
     protected static $output = [];
 
-    public static function find()
+    public static function find($refresh = false)
     {
-        $loop = Factory::create();
-        $client = new Client($loop);
-        $client->search('urn:Belkin:service:basicevent:1', 2)->then(
-            function (){
-                //echo 'Search completed' . PHP_EOL;
-            },
-            function ($e){
-                throw new \Exception('Device discovery failed: ' . $e);
-            },
-            function ($progress){
-                static::$output[] = $progress;
+        if($refresh === false){
+            $devices = static::getDevicesFromStorage();
+            if(!empty($devices)){
+                return $devices;
+            } else {
+                $refresh = true;
             }
-        );
-        $loop->run();
+        }
 
-        return static::getDeviceInfo(static::$output);
+        if($refresh) {
+            $loop = Factory::create();
+            $client = new Client($loop);
+            $client->search('urn:Belkin:service:basicevent:1', 2)->then(
+                function (){
+                    if(Config::get('debug') === true) {
+                        echo 'Search completed' . PHP_EOL;
+                    }
+                },
+                function ($e){
+                    throw new \Exception('Device discovery failed: ' . $e);
+                },
+                function ($progress){
+                    if(Config::get('debug') === true) {
+                        echo "found one!".PHP_EOL;
+                    }
+                    static::$output[] = $progress;
+                }
+            );
+            $loop->run();
+        }
+
+        $devices = static::getDeviceInfo(static::$output);
+        static::setDevicesInStorage($devices);
+        return $devices;
+    }
+
+    public static function getBaseDeviceByName($name)
+    {
+        $id = str_replace(' ', '_', strtolower($name));
+        $device = static::lookupDevice('id', $id);
+        if(isset($device['class_name'])){
+            $class = $device['class_name'];
+            return new $class($id);
+        }
+        throw new \Exception('Invalid device id supplied. No base device found by id '.$name);
+    }
+
+    public static function lookupDevice($key, $value)
+    {
+        $devices = static::find();
+
+        foreach($devices as $device){
+            if($value === $device[$key]){
+                return $device;
+            }
+        }
+
+        throw new \Exception('Device not found for '.$key.' = '.$value);
     }
 
     protected static function getDeviceInfo($devices)
@@ -37,16 +82,86 @@ class Discovery
             $wc = new WemoClient($ip);
             $info = $wc->info('setup.xml');
             $info = $info['root']['device'];
-            $infos[] = [
+            $data = [
+                'id'           => str_replace(' ', '_', strtolower($info['friendlyName'])),
                 'ip'           => $ip,
                 'deviceType'   => $info['deviceType'],
                 'friendlyName' => $info['friendlyName'],
                 'modelName'    => $info['modelName'],
-                'UDN'          => $info['UDN'],
-                'binaryState'  => $info['binaryState']
+                'UDN'          => $info['UDN']
             ];
+
+            if(static::isBridge($info['UDN'])){
+                $bridge = new Bridge($ip);
+                $devices = $bridge->getPairedDevices(true);
+
+                foreach($devices as $i => $device){
+                    $device['id'] = str_replace(' ', '_', strtolower($device['FriendlyName']));
+                    $devices[$i] = $device;
+                }
+
+                $data['class_name'] = Bridge::class;
+                $data['device'] = $devices;
+            } else if(static::isLightSwitch($info['UDN'])){
+                $data['class_name'] = LightSwitch::class;
+            } else if(static::isWemoSwitch($info['UDN'])){
+                $data['class_name'] = WemoSwitch::class;
+            }
+
+            $infos[] = $data;
         }
 
         return $infos;
+    }
+
+    protected static function setDevicesInStorage($devices)
+    {
+        try {
+            $file = Config::get('device_storage');
+            $json = json_encode($devices, JSON_UNESCAPED_SLASHES);
+            @file_put_contents($file, $json);
+
+            return true;
+        } catch(\Exception $e) {
+            return false;
+        }
+    }
+
+    protected static function getDevicesFromStorage()
+    {
+        try {
+            $file = Config::get('device_storage');
+            $content = @file_get_contents($file);
+            if(!empty($content)){
+                $devices = json_decode($content, true);
+                return $devices;
+            } else {
+                return null;
+            }
+
+        } catch (\Exception $e){
+            return null;
+        }
+    }
+
+    protected static function isBridge($udn){
+        if(strpos($udn, 'uuid:Bridge-1') !== false){
+            return true;
+        }
+        return false;
+    }
+
+    protected static function isLightSwitch($udn){
+        if(strpos($udn, 'uuid:Lightswitch-1') !== false){
+            return true;
+        }
+        return false;
+    }
+
+    protected static function isWemoSwitch($udn){
+        if(strpos($udn, 'uuid:Socket-1') !== false){
+            return true;
+        }
+        return false;
     }
 }
