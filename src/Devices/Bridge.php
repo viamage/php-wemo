@@ -22,18 +22,20 @@ class Bridge extends BaseDevice
         ]
     ];
 
-    public function getPairedDevices()
+    public function getPairedDevices($refresh = false)
     {
-        $device = self::lookupDevice('ip', $this->ip);
-        if(isset($device['device']) && is_array($device['device'])){
-            return $device['device'];
+        if($refresh === false) {
+            $device = self::lookupDevice('ip', $this->ip);
+            if (isset($device['device']) && is_array($device['device'])) {
+                return $device['device'];
+            }
         }
 
         $service = $this->services['BridgeService']['serviceType'];
         $controlUrl = $this->services['BridgeService']['controlURL'];
         $method = 'GetEndDevices';
         $arguments = [
-            'DevUDN'      => $this->getUDN(),
+            'DevUDN'      => $this->getUDN($refresh),
             'ReqListType' => 'PAIRED_LIST'
         ];
 

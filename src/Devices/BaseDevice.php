@@ -28,11 +28,13 @@ class BaseDevice
         return $this->client->info($resource);
     }
 
-    public function getUDN()
+    public function getUDN($refresh = false)
     {
-        $device = static::lookupDevice('ip', $this->ip);
-        if(isset($device['UDN'])){
-            return $device['UDN'];
+        if($refresh === false) {
+            $device = static::lookupDevice('ip', $this->ip);
+            if (isset($device['UDN'])) {
+                return $device['UDN'];
+            }
         }
 
         $rs = $this->client->info('setup.xml');

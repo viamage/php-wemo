@@ -25,12 +25,17 @@ class Discovery
             $client = new Client($loop);
             $client->search('urn:Belkin:service:basicevent:1', 2)->then(
                 function (){
-                    //echo 'Search completed' . PHP_EOL;
+                    if(Config::get('debug') === true) {
+                        echo 'Search completed' . PHP_EOL;
+                    }
                 },
                 function ($e){
                     throw new \Exception('Device discovery failed: ' . $e);
                 },
                 function ($progress){
+                    if(Config::get('debug') === true) {
+                        echo "found one!".PHP_EOL;
+                    }
                     static::$output[] = $progress;
                 }
             );
@@ -62,7 +67,7 @@ class Discovery
 
             if(static::isBridge($info['UDN'])){
                 $bridge = new Bridge($ip);
-                $devices = $bridge->getPairedDevices();
+                $devices = $bridge->getPairedDevices(true);
 
                 foreach($devices as $i => $device){
                     $device['id'] = str_replace(' ', '_', strtolower($device['FriendlyName']));
