@@ -11,3 +11,24 @@ Currently supports...
 Next to support...
 
 1. Wemo light bulb group - on/off/dimming
+
+
+Install:
+
+Use composer...
+
+<pre>
+require:{
+    "a15lam/php-wemo" : "dev-develop as dev-master"
+}
+</pre>
+
+Usage:
+
+<pre>
+<?php
+$lightSwitch = \a15lam\PhpWemo\Discovery::getBaseDeviceByName('Bed Room Light'); // Use your wemo device name as they show on your wemo app
+$lightSwitch->On();
+sleep(2); // Allow a moment to see the light turning on.
+$lightSwitch->Off();
+</pre>
