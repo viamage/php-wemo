@@ -4,42 +4,64 @@ namespace a15lam\PhpWemo\Devices;
 use a15lam\PhpWemo\Contracts\DeviceInterface;
 use a15lam\PhpWemo\Traits\Dimmable;
 
+/**
+ * Class WemoBulb
+ *
+ * @package a15lam\PhpWemo\Devices
+ */
 class WemoBulb implements DeviceInterface
 {
     use Dimmable;
 
-    /** @type \a15lam\PhpWemo\Devices\Bridge|null  */
+    /** @type \a15lam\PhpWemo\Devices\Bridge|null */
     protected $bridge = null;
 
+    /** @type string null */
     protected $deviceId = null;
 
-    protected $deviceName = null;
-
-    public function __construct(Bridge $bridge, $deviceName = null, $deviceId = null)
+    /**
+     * WemoBulb constructor.
+     *
+     * @param string $bridgeId Wemo bridge ip or id
+     * @param string $deviceId Bridge device id from discovery.
+     * @param string $port
+     *
+     * @throws \Exception
+     */
+    public function __construct($bridgeId, $deviceId = null, $port = null)
     {
-        $this->bridge = $bridge;
-        if(!empty($deviceId)){
-            $this->deviceId = $deviceId;
-        } else if(!empty($deviceName)) {
-            $this->deviceId = $this->bridge->getDeviceIdByCustomId($deviceName);
+        $this->bridge = new Bridge($bridgeId, $port);
 
-            if(empty($this->deviceId)) {
-                $this->deviceId = $this->bridge->getDeviceIdByFriendlyName($deviceName);
+        if (!empty($deviceId)) {
+            $this->deviceId = $this->bridge->getDeviceIdByCustomId($deviceId);
+
+            if (empty($this->deviceId)) {
+                throw new \Exception('No bridge device found using id ' . $deviceId);
             }
         }
 
-        if(empty($this->deviceId)){
+        if (empty($this->deviceId)) {
             throw new \Exception('No device name or id provided.');
         }
     }
 
+    /**
+     * Turns on bulb
+     *
+     * @return bool|string
+     */
     public function On()
     {
-        $this->bridge->bulbOn($this->deviceId);
+        return $this->bridge->bulbOn($this->deviceId);
     }
 
+    /**
+     * Turns off bulb
+     *
+     * @return bool|string
+     */
     public function Off()
     {
-        $this->bridge->bulbOff($this->deviceId);
+        return $this->bridge->bulbOff($this->deviceId);
     }
 }

@@ -4,6 +4,11 @@ namespace a15lam\PhpWemo\Devices;
 
 use a15lam\PhpWemo\Contracts\DeviceInterface;
 
+/**
+ * Class WemoSwitch
+ *
+ * @package a15lam\PhpWemo\Devices
+ */
 class WemoSwitch extends BaseDevice implements DeviceInterface
 {
     protected $services = [
@@ -16,11 +21,23 @@ class WemoSwitch extends BaseDevice implements DeviceInterface
         ]
     ];
 
+    /**
+     * Turns on switch
+     *
+     * @return bool|string
+     * @throws \Exception
+     */
     public function On()
     {
         return ($this->setBinaryState(1))? '1' : false;
     }
 
+    /**
+     * Turns off switch
+     *
+     * @return bool|string
+     * @throws \Exception
+     */
     public function Off()
     {
         return ($this->setBinaryState(0))? '0' : false;
