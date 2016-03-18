@@ -3,7 +3,7 @@ PHP library to control Wemo devices (Work in progress)
 
 Currently supports...
 
-1. Wemo light bulb - on/off/dimming (no group support yet) 
+1. Wemo light bulb - on/off/dimming 
 2. Wemo light switch - on/off
 3. Wemo switch (socket) - on/off
 4. Device discovery

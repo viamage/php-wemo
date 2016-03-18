@@ -44,19 +44,19 @@ require __DIR__ . '/../vendor/autoload.php';
 //sleep(2);
 //$switch->On();
 //print_r($switch->state());
-
-$wb = \a15lam\PhpWemo\Discovery::getDeviceByName('media room');
-$wb->on();
-sleep(2);
-echo "state:".$wb->state().PHP_EOL;
-sleep(2);
-$wb->off();
-sleep(1);
-echo "state:".$wb->state().PHP_EOL;
+//
+//$wb = \a15lam\PhpWemo\Discovery::getDeviceByName('media room');
+//$wb->on();
+//sleep(2);
+//echo "state:".$wb->state().PHP_EOL;
+//sleep(2);
+//$wb->off();
+//sleep(1);
+//echo "state:".$wb->state().PHP_EOL;
 
 //$b = new \a15lam\PhpWemo\WemoClient('192.168.1.68');
 //echo "here".PHP_EOL;
 //print_r($b->info('setup.xml'));
 
-//$devices = \a15lam\PhpWemo\Discovery::find(true);
-//print_r($devices);
+$devices = \a15lam\PhpWemo\Discovery::find(true);
+print_r($devices);
