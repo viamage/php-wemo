@@ -44,3 +44,8 @@ require __DIR__ . '/../vendor/autoload.php';
 //sleep(2);
 //$switch->On();
 //print_r($switch->state());
+
+$wb = \a15lam\PhpWemo\Discovery::getDeviceByName('media room 1');
+$wb->on();
+sleep(2);
+$wb->off();

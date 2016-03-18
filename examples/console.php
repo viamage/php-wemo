@@ -1,34 +1,38 @@
 <?php
 require __DIR__ . '/../vendor/autoload.php';
 
-echo "\n\n-------------------------------------------------".PHP_EOL;
-echo "| PHP-WEMO Console ".PHP_EOL;
-echo "-------------------------------------------------".PHP_EOL;
+echo "\n\n-------------------------------------------------" . PHP_EOL;
+echo "| PHP-WEMO Console " . PHP_EOL;
+echo "-------------------------------------------------" . PHP_EOL;
 
-$refresh = (isset($argv[1]))? $argv[1] : false;
+$refresh = (isset($argv[1])) ? $argv[1] : false;
 
-if($refresh){
-    echo "Searching for Wemo devices...".PHP_EOL;
-}
 $devices = \a15lam\PhpWemo\Discovery::find($refresh);
 
-if(count($devices)>0) {
-    while(true) {
-        echo "Your Wemo devices...\n" . PHP_EOL;
+if (count($devices) > 0) {
+    while (true) {
+        echo "Looking up your Wemo devices...\n" . PHP_EOL;
 
         $list = [];
         foreach ($devices as $device) {
             if ($device['deviceType'] === 'urn:Belkin:device:bridge:1') {
                 foreach ($device['device'] as $d) {
-                    $list[] = $device['id'] . '.' . $d['id'];
+                    if ($d['productName'] === 'Lighting') {
+                        $di = new \a15lam\PhpWemo\Devices\WemoBulb($device['id'], $d['id']);
+                        $list[] = [$device['id'] . '.' . $d['id'], $di->state(), $di->dimState()];
+                    }
                 }
             } else {
-                $list[] = $device['id'];
+                $dc = $device['class_name'];
+                $di = new $dc($device['id']);
+                $list[] = [$device['id'], $di->state()];
             }
         }
 
         foreach ($list as $i => $l) {
-            echo "[$i] $l" . PHP_EOL;
+            $dimState = (isset($l[2])) ? ':' . $l[2] : '';
+            $state = (boolval($l[1]) === true) ? 'On' : 'Off';
+            echo "[$i] [$state" . "$dimState] $l[0]" . PHP_EOL;
         }
 
         $choice = -1;
@@ -38,12 +42,12 @@ if(count($devices)>0) {
                 echo "Invalid choice. Please select from 0 to " . (count($list) - 1) . PHP_EOL;
             }
             $choice =
-                trim(readline("\nPlease select a Wemo device that you would like to control (0..." .
+                trim(readline("\nPlease select a Wemo device to control (0..." .
                     (count($list) - 1) .
                     "): "));
         }
 
-        $chosen = explode('.', $list[$choice]);
+        $chosen = explode('.', $list[$choice][0]);
         $device = \a15lam\PhpWemo\Discovery::lookupDevice('id', $chosen[0]);
         $deviceClass = $device['class_name'];
         $myDevice = null;
@@ -74,12 +78,12 @@ if(count($devices)>0) {
 
             $success = false;
             while (!$success) {
-                $operation = explode(':', trim(strtolower(readline("\nWhat would you like to do with $chosen[1]? "))));
+                $operation = explode(':', trim(strtolower(readline("\nTurn on/off/dim $chosen[1]? "))));
 
                 if ('on' === $operation[0]) {
-                    $success = ($myDevice->On() === false)? false : true;
+                    $success = ($myDevice->On() === false) ? false : true;
                 } else if ('off' === $operation[0]) {
-                    $success = ($myDevice->Off() === false)? false : true;
+                    $success = ($myDevice->Off() === false) ? false : true;
                 } else if ('dim' === $operation[0] && isset($operation[1])) {
                     $success = $myDevice->dim($operation[1]);
                 }
@@ -95,18 +99,18 @@ if(count($devices)>0) {
 
             $success = false;
             while (!$success) {
-                $operation = trim(strtolower(readline("\nWhat would you like to do with $chosen[0]? ")));
+                $operation = trim(strtolower(readline("\nTurn on/off $chosen[0]? ")));
 
                 if ('on' === $operation) {
-                    $success = ($myDevice->On() === false)? false : true;
+                    $success = ($myDevice->On() === false) ? false : true;
                 } else if ('off' === $operation) {
-                    $success = ($myDevice->Off() === false)? false : true;
+                    $success = ($myDevice->Off() === false) ? false : true;
                 }
             }
         }
 
-        echo "\nOperation successful.".PHP_EOL;
-        echo "-------------------------------------------------\n".PHP_EOL;
+        echo "\nOperation successful." . PHP_EOL;
+        echo "-------------------------------------------------\n" . PHP_EOL;
     }
 } else {
     echo "Could not find any Wemo devices in your network. You may try again.";

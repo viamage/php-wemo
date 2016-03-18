@@ -3,6 +3,7 @@ namespace a15lam\PhpWemo;
 
 use a15lam\PhpWemo\Devices\Bridge;
 use a15lam\PhpWemo\Devices\LightSwitch;
+use a15lam\PhpWemo\Devices\WemoBulb;
 use a15lam\PhpWemo\Devices\WemoSwitch;
 use Clue\React\Ssdp\Client;
 use React\EventLoop\Factory;
@@ -81,15 +82,28 @@ class Discovery
      * @return mixed
      * @throws \Exception
      */
-    public static function getBaseDeviceByName($name)
+    public static function getDeviceByName($name)
     {
         $id = str_replace(' ', '_', strtolower($name));
         $device = static::lookupDevice('id', $id);
-        if (isset($device['class_name'])) {
+        if (!empty($device) && isset($device['class_name'])) {
             $class = $device['class_name'];
 
             return new $class($id);
         }
+
+        // Search device in wemo link
+        $bridge = new Bridge('wemo_link');
+        $devices = $bridge->getPairedDevices();
+
+        foreach($devices as $d){
+            if($id === $d['id']){
+                if($d['productName'] === 'Lighting'){
+                    return new WemoBulb('wemo_link', $id);
+                }
+            }
+        }
+
         throw new \Exception('Invalid device id supplied. No base device found by id ' . $name);
     }
 
@@ -112,7 +126,7 @@ class Discovery
             }
         }
 
-        throw new \Exception('Device not found for ' . $key . ' = ' . $value);
+        return null;
     }
 
     /**

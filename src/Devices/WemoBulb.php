@@ -68,6 +68,8 @@ class WemoBulb implements DeviceInterface
     public function state(){
         $currentState = $this->bridge->getBulbState($this->deviceId);
         $state = $currentState[0];
+        return $state;
+        
         $level = explode(':', $currentState[1])[0];
         $percent = round(($level*100)/255);
 

@@ -29,4 +29,13 @@ trait Dimmable{
 
         return $this->bridge->setDeviceStatus($this->deviceId, $level);
     }
+    
+    public function dimState()
+    {
+        $currentState = $this->bridge->getBulbState($this->deviceId);
+        $level = explode(':', $currentState[1])[0];
+        $percent = round(($level*100)/255);
+
+        return $percent;
+    }
 }
