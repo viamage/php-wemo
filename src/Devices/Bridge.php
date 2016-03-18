@@ -181,6 +181,11 @@ class Bridge extends BaseDevice
         return true;
     }
 
+    /**
+     * @param $deviceId
+     *
+     * @return bool
+     */
     public function getBulbState($deviceId)
     {
         $devices = $this->getPairedDevices(true);

@@ -29,7 +29,12 @@ trait Dimmable{
 
         return $this->bridge->setDeviceStatus($this->deviceId, null, $level);
     }
-    
+
+    /**
+     * Returns dim level
+     * 
+     * @return mixed
+     */
     public function dimState()
     {
         $currentState = $this->bridge->getBulbState($this->deviceId);

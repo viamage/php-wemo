@@ -42,7 +42,13 @@ class WemoSwitch extends BaseDevice implements DeviceInterface
     {
         return ($this->setBinaryState(0))? '0' : false;
     }
-    
+
+    /**
+     * Returns switch state
+     * 
+     * @return mixed
+     * @throws \Exception
+     */
     public function state(){
         return $this->getBinaryState();
     }

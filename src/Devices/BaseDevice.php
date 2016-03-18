@@ -93,7 +93,11 @@ class BaseDevice
 
         return $rs;
     }
-    
+
+    /**
+     * @return mixed
+     * @throws \Exception
+     */
     protected function getBinaryState()
     {
         $service = $this->services['BridgeService']['serviceType'];
