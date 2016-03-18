@@ -26,8 +26,10 @@ require:{
 Usage:
 
 <pre>
-$lightSwitch = \a15lam\PhpWemo\Discovery::getBaseDeviceByName('Bed Room Light'); // Use your wemo device name as they show on your wemo app
+$lightSwitch = \a15lam\PhpWemo\Discovery::getDeviceByName('Bed Room Light'); // Use your wemo device name as they show on your wemo app
 $lightSwitch->On();
 sleep(2); // Allow a moment to see the light turning on.
 $lightSwitch->Off();
 </pre>
+
+Check the example directory for more usage. Run example/console.php to control your devices.
