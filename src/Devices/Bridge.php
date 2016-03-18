@@ -111,6 +111,10 @@ class Bridge extends BaseDevice
      */
     public function setDeviceStatus($deviceId, $level)
     {
+        $state = '0';
+        if(intval($level)>0){
+            $state = '1';
+        }
         $service = $this->services['BridgeService']['serviceType'];
         $controlUrl = $this->services['BridgeService']['controlURL'];
         $method = 'SetDeviceStatus';
@@ -118,7 +122,7 @@ class Bridge extends BaseDevice
             'DeviceStatusList' => '&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;&lt;DeviceStatusList&gt;&lt;DeviceStatus&gt;&lt;IsGroupAction&gt;NO&lt;/IsGroupAction&gt;&lt;DeviceID
 available=&quot;YES&quot;&gt;' .
                 $deviceId .
-                '&lt;/DeviceID&gt;&lt;CapabilityID&gt;10006,10008,30008,30009,3000A&lt;/CapabilityID&gt;&lt;CapabilityValue&gt;0,' .
+                '&lt;/DeviceID&gt;&lt;CapabilityID&gt;10006,10008,30008,30009,3000A&lt;/CapabilityID&gt;&lt;CapabilityValue&gt;'.$state.',' .
                 $level .
                 ':0,,,&lt;/CapabilityValue&gt;&lt;LastEventTimeStamp&gt;0&lt;/LastEventTimeStamp&gt;&lt;/DeviceStatus&gt;&lt;/DeviceStatusList&gt;'
         ];
@@ -131,5 +135,18 @@ available=&quot;YES&quot;&gt;' .
         }
 
         return true;
+    }
+    
+    public function getBulbState($deviceId)
+    {
+        $devices = $this->getPairedDevices(true);
+        foreach ($devices as $device){
+            if($device['DeviceID'] === $deviceId){
+                $curstate = explode(',', $device['CurrentState']);
+                return $curstate;
+            }
+        }
+        
+        return false;
     }
 }

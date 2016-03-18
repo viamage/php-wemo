@@ -64,4 +64,13 @@ class WemoBulb implements DeviceInterface
     {
         return $this->bridge->bulbOff($this->deviceId);
     }
+
+    public function state(){
+        $currentState = $this->bridge->getBulbState($this->deviceId);
+        $state = $currentState[0];
+        $level = explode(':', $currentState[1])[0];
+        $percent = round(($level*100)/255);
+
+        return [$state, $percent];
+    }
 }

@@ -93,6 +93,22 @@ class BaseDevice
 
         return $rs;
     }
+    
+    protected function getBinaryState()
+    {
+        $service = $this->services['BridgeService']['serviceType'];
+        $controlUrl = $this->services['BridgeService']['controlURL'];
+        $method = 'GetBinaryState';
+
+        $rs = $this->client->request($controlUrl, $service, $method);
+        $rs = $this->unwrapResponse($rs);
+
+        if (isset($rs['s:Fault'])) {
+            throw new \Exception('Failed to change switch state. ' . print_r($rs, true));
+        }
+
+        return $rs['u:GetBinaryStateResponse']['BinaryState'];
+    }
 
     /**
      * @param array $response
