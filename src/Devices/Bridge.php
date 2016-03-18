@@ -51,7 +51,25 @@ class Bridge extends BaseDevice
         $rs = $this->unwrapResponse($rs);
         $rs = WemoClient::xmlToArray($rs['u:GetEndDevicesResponse']['DeviceLists']);
 
-        return $rs['DeviceLists']['DeviceList']['DeviceInfos']['DeviceInfo'];
+        // Standalone devices.
+        $devices = $rs['DeviceLists']['DeviceList']['DeviceInfos']['DeviceInfo'];
+        foreach ($devices as $k => $d) {
+            $d['IsGroupAction'] = 'NO';
+            $devices[$k] = $d;
+        }
+        // Grouped devices.
+        $groupedDevices = $rs['DeviceLists']['DeviceList']['GroupInfos'];
+        foreach ($groupedDevices as $gd) {
+            $devices[] = [
+                'DeviceID'      => $gd['GroupID'],
+                'FriendlyName'  => $gd['GroupName'],
+                'CurrentState'  => $gd['GroupCapabilityValues'],
+                'productName'   => $gd['DeviceInfos']['DeviceInfo'][0]['productName'],
+                'IsGroupAction' => 'YES'
+            ];
+        }
+
+        return $devices;
     }
 
     /**
@@ -84,7 +102,7 @@ class Bridge extends BaseDevice
      */
     public function bulbOn($deviceId)
     {
-        return ($this->setDeviceStatus($deviceId, '255')) ? '1' : false;
+        return ($this->setDeviceStatus($deviceId, 1)) ? '1' : false;
     }
 
     /**
@@ -97,34 +115,60 @@ class Bridge extends BaseDevice
      */
     public function bulbOff($deviceId)
     {
-        return ($this->setDeviceStatus($deviceId, '0')) ? '0' : false;
+        return ($this->setDeviceStatus($deviceId, 0)) ? '0' : false;
     }
 
     /**
      * Sets bridge device status
      *
      * @param $deviceId
+     * @param $state
      * @param $level
      *
      * @return bool
      * @throws \Exception
      */
-    public function setDeviceStatus($deviceId, $level)
+    public function setDeviceStatus($deviceId, $state = null, $level = null)
     {
-        $state = '0';
-        if(intval($level)>0){
+        $groupAction = 'NO';
+        $devices = $this->getPairedDevices();
+        foreach ($devices as $d) {
+            if ($deviceId === $d['DeviceID']) {
+                $groupAction = $d['IsGroupAction'];
+            }
+        }
+
+        if (intval($level) > 0 && $state === 0) {
             $state = '1';
         }
+
+        $capids = [];
+        $capval = [];
+        if ($state !== null) {
+            $capids[] = '10006';
+            $capval[] = $state;
+        }
+        if ($level !== null) {
+            $capids[] = '10008';
+            $capval[] = $level . ':0';
+        }
+
+        $capIdsString = implode(',', $capids);
+        $capValString = implode(',', $capval);
+
         $service = $this->services['BridgeService']['serviceType'];
         $controlUrl = $this->services['BridgeService']['controlURL'];
         $method = 'SetDeviceStatus';
         $arguments = [
-            'DeviceStatusList' => '&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;&lt;DeviceStatusList&gt;&lt;DeviceStatus&gt;&lt;IsGroupAction&gt;NO&lt;/IsGroupAction&gt;&lt;DeviceID
-available=&quot;YES&quot;&gt;' .
+            'DeviceStatusList' => '&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;&lt;DeviceStatusList&gt;&lt;DeviceStatus&gt;&lt;IsGroupAction&gt;' .
+                $groupAction .
+                '&lt;/IsGroupAction&gt;&lt;DeviceID available=&quot;YES&quot;&gt;' .
                 $deviceId .
-                '&lt;/DeviceID&gt;&lt;CapabilityID&gt;10006,10008,30008,30009,3000A&lt;/CapabilityID&gt;&lt;CapabilityValue&gt;'.$state.',' .
-                $level .
-                ':0,,,&lt;/CapabilityValue&gt;&lt;LastEventTimeStamp&gt;0&lt;/LastEventTimeStamp&gt;&lt;/DeviceStatus&gt;&lt;/DeviceStatusList&gt;'
+                '&lt;/DeviceID&gt;&lt;CapabilityID&gt;' .
+                $capIdsString .
+                '&lt;/CapabilityID&gt;&lt;CapabilityValue&gt;' .
+                $capValString .
+                '&lt;/CapabilityValue&gt;&lt;LastEventTimeStamp&gt;0&lt;/LastEventTimeStamp&gt;&lt;/DeviceStatus&gt;&lt;/DeviceStatusList&gt;'
         ];
 
         $rs = $this->client->request($controlUrl, $service, $method, $arguments);
@@ -136,17 +180,18 @@ available=&quot;YES&quot;&gt;' .
 
         return true;
     }
-    
+
     public function getBulbState($deviceId)
     {
         $devices = $this->getPairedDevices(true);
-        foreach ($devices as $device){
-            if($device['DeviceID'] === $deviceId){
+        foreach ($devices as $device) {
+            if ($device['DeviceID'] === $deviceId) {
                 $curstate = explode(',', $device['CurrentState']);
+
                 return $curstate;
             }
         }
-        
+
         return false;
     }
 }

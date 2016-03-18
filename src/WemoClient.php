@@ -56,7 +56,7 @@ class WemoClient
             CURLOPT_URL            => $url,
             CURLOPT_PORT           => $this->port,
             CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_VERBOSE        => false
+            CURLOPT_VERBOSE        => Config::get('debug', false)
         ];
 
         $ch = curl_init();
@@ -105,7 +105,7 @@ class WemoClient
                 CURLOPT_PORT           => $this->port,
                 CURLOPT_POSTFIELDS     => $xml,
                 CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_VERBOSE        => false,
+                CURLOPT_VERBOSE        => Config::get('debug', false),
                 CURLOPT_HTTPHEADER     => [
                     'Content-Type:text/xml',
                     'SOAPACTION:"' . $action . '"'

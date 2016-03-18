@@ -27,7 +27,7 @@ trait Dimmable{
 
         $level = round((255*$percent)/100);
 
-        return $this->bridge->setDeviceStatus($this->deviceId, $level);
+        return $this->bridge->setDeviceStatus($this->deviceId, null, $level);
     }
     
     public function dimState()
