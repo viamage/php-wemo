@@ -7,10 +7,7 @@ Currently supports...
 2. Wemo light switch - on/off
 3. Wemo switch (socket) - on/off
 4. Device discovery
- 
-Next to support...
-
-1. Wemo light bulb group - on/off/dimming
+5. Grouped devices under wemo bridge
 
 
 Install:
@@ -26,8 +23,12 @@ require:{
 Usage:
 
 <pre>
-$lightSwitch = \a15lam\PhpWemo\Discovery::getBaseDeviceByName('Bed Room Light'); // Use your wemo device name as they show on your wemo app
+$lightSwitch = \a15lam\PhpWemo\Discovery::getDeviceByName('Bed Room Light'); // Use your wemo device name as they show on your wemo app. Supports grouped devices
 $lightSwitch->On();
 sleep(2); // Allow a moment to see the light turning on.
 $lightSwitch->Off();
+// Get switch status
+echo $lightSwitch->status();
 </pre>
+
+Check the example directory for more usage. Run example/console.php to control your devices.

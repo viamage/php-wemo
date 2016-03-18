@@ -1,40 +1,62 @@
 <?php
 namespace a15lam\PhpWemo;
 
+/**
+ * Class WemoClient
+ *
+ * This class makes various HTTP requests to Wemo devices.
+ *
+ * @package a15lam\PhpWemo
+ */
 class WemoClient
 {
+    /** Output format XML */
     const FORMAT_XML = 1;
 
+    /** Output format Array */
     const FORMAT_ARRAY = 2;
 
+    /** Output format JSON */
     const FORMAT_JSON = 3;
 
+    /** @type string null */
     protected $ip = null;
 
+    /** @type string null */
     protected $port = null;
 
+    /** @type int|null */
     protected $output = null;
 
-    public function __construct($ip, $port = null)
+    /**
+     * WemoClient constructor.
+     *
+     * @param string $ip
+     * @param null   $port
+     * @param int    $outputFormat
+     */
+    public function __construct($ip, $port = null, $outputFormat = WemoClient::FORMAT_ARRAY)
     {
         $this->ip = $ip;
-        $this->port = (!empty($port))? $port : Config::get('port');
-        $this->setOutput(static::FORMAT_ARRAY);
+        $this->port = (!empty($port)) ? $port : Config::get('port');
+        $this->output = $outputFormat;
     }
 
-    public function setOutput($output)
-    {
-        $this->output = $output;
-    }
-
+    /**
+     * Fetches device information
+     *
+     * @param $url string resource url (Ex: setup.xml)
+     *
+     * @return array|string
+     */
     public function info($url)
     {
-        $url = 'http://'.$this->ip.'/'.ltrim($url, '/');
+        $url = 'http://' . $this->ip . '/' . ltrim($url, '/');
         $options = [
             CURLOPT_URL            => $url,
             CURLOPT_PORT           => $this->port,
             CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_VERBOSE        => false
+            CURLOPT_VERBOSE        => Config::get('debug', false)
         ];
 
         $ch = curl_init();
@@ -44,6 +66,17 @@ class WemoClient
         return $this->formatResponse($response);
     }
 
+    /**
+     * Makes requests to devices.
+     *
+     * @param string $controlUrl
+     * @param string $service
+     * @param string $method
+     * @param array  $arguments
+     *
+     * @return array|string
+     * @throws \Exception
+     */
     public function request($controlUrl, $service, $method, $arguments = [])
     {
         $controlUrl = ltrim($controlUrl, '/');
@@ -72,7 +105,7 @@ class WemoClient
                 CURLOPT_PORT           => $this->port,
                 CURLOPT_POSTFIELDS     => $xml,
                 CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_VERBOSE        => false,
+                CURLOPT_VERBOSE        => Config::get('debug', false),
                 CURLOPT_HTTPHEADER     => [
                     'Content-Type:text/xml',
                     'SOAPACTION:"' . $action . '"'
@@ -82,18 +115,25 @@ class WemoClient
             $ch = curl_init();
             curl_setopt_array($ch, $options);
             $response = curl_exec($ch);
-        } catch (\Exception $e){
+        } catch (\Exception $e) {
             throw $e;
         }
 
         return $this->formatResponse($response);
     }
 
+    /**
+     * Formats XML response to array or json
+     *
+     * @param $response
+     *
+     * @return array|string
+     */
     protected function formatResponse($response)
     {
-        if(static::FORMAT_ARRAY === $this->output){
+        if (static::FORMAT_ARRAY === $this->output) {
             $response = static::xmlToArray($response);
-        } else if(static::FORMAT_JSON === $this->output){
+        } else if (static::FORMAT_JSON === $this->output) {
             $response = static::xmlToArray($response);
             $response = json_encode($response, JSON_UNESCAPED_SLASHES);
         }

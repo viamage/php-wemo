@@ -2,7 +2,21 @@
 
 namespace a15lam\PhpWemo\Traits;
 
+/**
+ * Class Dimmable
+ *
+ * Dimmable trait for Wemo Bulbs
+ *
+ * @package a15lam\PhpWemo\Traits
+ */
 trait Dimmable{
+    /**
+     * Dims Wemo bulb to specified percentage
+     *
+     * @param $percent integer
+     *
+     * @return mixed
+     */
     public function dim($percent)
     {
         if($percent < 0){
@@ -13,6 +27,15 @@ trait Dimmable{
 
         $level = round((255*$percent)/100);
 
-        return $this->bridge->setDeviceStatus($this->deviceId, $level);
+        return $this->bridge->setDeviceStatus($this->deviceId, null, $level);
+    }
+    
+    public function dimState()
+    {
+        $currentState = $this->bridge->getBulbState($this->deviceId);
+        $level = explode(':', $currentState[1])[0];
+        $percent = round(($level*100)/255);
+
+        return $percent;
     }
 }
