@@ -52,23 +52,30 @@ class Bridge extends BaseDevice
         $rs = WemoClient::xmlToArray($rs['u:GetEndDevicesResponse']['DeviceLists']);
 
         // Standalone devices.
-        $devices = $rs['DeviceLists']['DeviceList']['DeviceInfos']['DeviceInfo'];
+        $devices = $rs['DeviceLists']['DeviceList']['DeviceInfos'];
+        if(static::isArrayAssoc($devices)) {
+            $devices = $rs['DeviceLists']['DeviceList']['DeviceInfos']['DeviceInfo'];
+        }
         foreach ($devices as $k => $d) {
             $d['IsGroupAction'] = 'NO';
             $devices[$k] = $d;
         }
         // Grouped devices.
         $groupedDevices = $rs['DeviceLists']['DeviceList']['GroupInfos'];
-        foreach ($groupedDevices as $gd) {
-            $devices[] = [
-                'DeviceID'      => $gd['GroupID'],
-                'FriendlyName'  => $gd['GroupName'],
-                'CurrentState'  => $gd['GroupCapabilityValues'],
-                'productName'   => $gd['DeviceInfos']['DeviceInfo'][0]['productName'],
-                'IsGroupAction' => 'YES'
-            ];
+        if(static::isArrayAssoc($groupedDevices)) {
+            $groupedDevices = $rs['DeviceLists']['DeviceList']['GroupInfos']['GroupInfo'];
         }
-
+        foreach ($groupedDevices as $gd) {
+            if(!empty($gd['GroupID']) && !empty($gd['GroupName']) && !empty($gd['GroupCapabilityValues'])) {
+                $devices[] = [
+                    'DeviceID'      => $gd['GroupID'],
+                    'FriendlyName'  => $gd['GroupName'],
+                    'CurrentState'  => $gd['GroupCapabilityValues'],
+                    'productName'   => $gd['DeviceInfos']['DeviceInfo'][0]['productName'],
+                    'IsGroupAction' => 'YES'
+                ];
+            }
+        }
         return $devices;
     }
 
@@ -198,5 +205,12 @@ class Bridge extends BaseDevice
         }
 
         return false;
+    }
+
+    public static function isArrayAssoc(array $array)
+    {
+        $keys = array_keys($array);
+
+        return array_keys($keys) !== $keys;
     }
 }
