@@ -10,17 +10,16 @@ Currently supports...
 5. Grouped devices under wemo bridge
 
 
-Install:
-
-Use composer...
+## Getting started:
 
 <pre>
-require:{
-    "a15lam/php-wemo" : "dev-develop as dev-master"
-}
+git clone https://github.com/a15lam/php-wemo.git
+cd php-wemo
+composer update
+php example/console.php   // An example command line app to control your wemo devices.
 </pre>
 
-Usage:
+## Usage:
 
 <pre>
 $lightSwitch = \a15lam\PhpWemo\Discovery::getDeviceByName('Bed Room Light'); // Use your wemo device name as they show on your wemo app. Supports grouped devices
@@ -31,4 +30,4 @@ $lightSwitch->Off();
 echo $lightSwitch->status();
 </pre>
 
-Check the example directory for more usage. Run example/console.php to control your devices.
+Check the example directory for more usage. Run example/console.php from command line to control your devices.
