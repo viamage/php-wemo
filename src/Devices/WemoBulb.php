@@ -75,4 +75,14 @@ class WemoBulb implements DeviceInterface
         $state = $currentState[0];
         return $state;
     }
+
+    /**
+     * Indicates if device is dimmable or not.
+     *
+     * @return bool
+     */
+    public function isDimmable()
+    {
+        return true;
+    }
 }

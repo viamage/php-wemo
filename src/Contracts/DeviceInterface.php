@@ -7,4 +7,6 @@ interface DeviceInterface{
     public function Off();
     
     public function state();
+
+    public function isDimmable();
 }
