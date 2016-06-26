@@ -53,4 +53,14 @@ class LightSwitch extends BaseDevice implements DeviceInterface
     {
         return $this->getBinaryState();
     }
+
+    /**
+     * Indicates if device is dimmable or not.
+     *
+     * @return bool
+     */
+    public function isDimmable()
+    {
+        return false;
+    }
 }
