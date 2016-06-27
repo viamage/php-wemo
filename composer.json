@@ -1,7 +1,7 @@
 {
   "name": "a15lam/php-wemo",
   "description": "PHP library for Wemo devices.",
-  "homepage": "https://github.com/a15lam/php-wemo",
+  "homepage": "https://a15lam.github.io/php-wemo/",
   "keywords": [
     "Wemo",
     "Soap",
