@@ -18,6 +18,7 @@
   ],
   "require": {
     "php": ">=5.5",
+    "a15lam/workspace": "dev-develop as dev-master",
     "clue/ssdp-react": "dev-master"
   },
   "autoload": {
