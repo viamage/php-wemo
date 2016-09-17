@@ -7,12 +7,12 @@ echo "-------------------------------------------------" . PHP_EOL;
 
 $refresh = (isset($argv[1])) ? $argv[1] : false;
 
+echo "Looking up your Wemo devices...\n" . PHP_EOL;
+
 $devices = \a15lam\PhpWemo\Discovery::find($refresh);
 
 if (count($devices) > 0) {
     while (true) {
-        echo "Looking up your Wemo devices...\n" . PHP_EOL;
-
         $list = [];
         foreach ($devices as $device) {
             if ($device['deviceType'] === 'urn:Belkin:device:bridge:1') {
@@ -29,10 +29,16 @@ if (count($devices) > 0) {
             }
         }
 
+        $list[] = '[QUIT]';
+
         foreach ($list as $i => $l) {
-            $dimState = (isset($l[2])) ? ':' . $l[2] : '';
-            $state = (boolval($l[1]) === true) ? 'On' : 'Off';
-            echo "[$i] [$state" . "$dimState] $l[0]" . PHP_EOL;
+            if('[QUIT]' !== $l) {
+                $dimState = (isset($l[2])) ? ':' . $l[2] : '';
+                $state = (boolval($l[1]) === true) ? 'On' : 'Off';
+                echo "[$i] [$state" . "$dimState] $l[0]" . PHP_EOL;
+            } else {
+                echo "[$i] $l";
+            }
         }
 
         $choice = -1;
@@ -45,6 +51,11 @@ if (count($devices) > 0) {
                 trim(readline("\nPlease select a Wemo device to control (0..." .
                     (count($list) - 1) .
                     "): "));
+        }
+
+        if((int) $choice === (count($list)-1)){
+            echo 'Bye...' . PHP_EOL;
+            exit();
         }
 
         $chosen = explode('.', $list[$choice][0]);
