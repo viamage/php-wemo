@@ -1,6 +1,8 @@
 <?php
 namespace a15lam\PhpWemo;
 
+use a15lam\PhpWemo\Workspace as WS;
+
 /**
  * Class WemoClient
  *
@@ -38,7 +40,7 @@ class WemoClient
     public function __construct($ip, $port = null, $outputFormat = WemoClient::FORMAT_ARRAY)
     {
         $this->ip = $ip;
-        $this->port = (!empty($port)) ? $port : Config::get('port');
+        $this->port = (!empty($port)) ? $port : WS::config()->get('port');
         $this->output = $outputFormat;
     }
 
@@ -56,7 +58,7 @@ class WemoClient
             CURLOPT_URL            => $url,
             CURLOPT_PORT           => $this->port,
             CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_VERBOSE        => Config::get('debug', false)
+            CURLOPT_VERBOSE        => WS::config()->get('debug', false)
         ];
 
         $ch = curl_init();
@@ -105,7 +107,7 @@ class WemoClient
                 CURLOPT_PORT           => $this->port,
                 CURLOPT_POSTFIELDS     => $xml,
                 CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_VERBOSE        => Config::get('debug', false),
+                CURLOPT_VERBOSE        => WS::config()->get('debug', false),
                 CURLOPT_HTTPHEADER     => [
                     'Content-Type:text/xml',
                     'SOAPACTION:"' . $action . '"'

@@ -5,6 +5,7 @@ use a15lam\PhpWemo\Devices\Bridge;
 use a15lam\PhpWemo\Devices\LightSwitch;
 use a15lam\PhpWemo\Devices\WemoBulb;
 use a15lam\PhpWemo\Devices\WemoSwitch;
+use a15lam\PhpWemo\Workspace as WS;
 use Clue\React\Ssdp\Client;
 use React\EventLoop\Factory;
 
@@ -49,7 +50,7 @@ class Discovery
             $client = new Client($loop);
             $client->search('urn:Belkin:service:basicevent:1', 2)->then(
                 function (){
-                    if (Config::get('debug') === true) {
+                    if (WS::config()->get('debug') === true) {
                         echo 'Search completed' . PHP_EOL;
                     }
                 },
@@ -57,7 +58,7 @@ class Discovery
                     throw new \Exception('Device discovery failed: ' . $e);
                 },
                 function ($progress){
-                    if (Config::get('debug') === true) {
+                    if (WS::config()->get('debug') === true) {
                         echo "found one!" . PHP_EOL;
                     }
                     static::$output[] = $progress;
@@ -188,7 +189,7 @@ class Discovery
     protected static function setDevicesInStorage($devices)
     {
         try {
-            $file = Config::get('device_storage');
+            $file = WS::config()->get('device_storage');
             $json = json_encode($devices, JSON_UNESCAPED_SLASHES);
             @file_put_contents($file, $json);
 
@@ -206,7 +207,7 @@ class Discovery
     protected static function getDevicesFromStorage()
     {
         try {
-            $file = Config::get('device_storage');
+            $file = WS::config()->get('device_storage');
             $content = @file_get_contents($file);
             if (!empty($content)) {
                 $devices = json_decode($content, true);

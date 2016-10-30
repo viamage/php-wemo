@@ -4,7 +4,7 @@ namespace a15lam\PhpWemo\Devices;
 
 use a15lam\PhpWemo\Discovery;
 use a15lam\PhpWemo\WemoClient;
-use a15lam\PhpWemo\Config;
+use a15lam\PhpWemo\Workspace as WS;
 
 /**
  * Class BaseDevice
@@ -31,7 +31,7 @@ class BaseDevice
     public function __construct($id, $port = null)
     {
         $this->ip = (self::isIp($id)) ? $id : static::getDeviceIpById($id);
-        $port = (!empty($port)) ? $port : Config::get('port');
+        $port = (!empty($port)) ? $port : WS::config()->get('port');
         $this->client = new WemoClient($this->ip, $port);
     }
 

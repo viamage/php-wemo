@@ -61,11 +61,12 @@ class Bridge extends BaseDevice
             $devices[$k] = $d;
         }
         // Grouped devices.
+        $groupedDeviceList = [];
         $groupedDevices = $rs['DeviceLists']['DeviceList']['GroupInfos'];
         if(static::isArrayAssoc($groupedDevices)) {
-            $groupedDevices = $rs['DeviceLists']['DeviceList']['GroupInfos']['GroupInfo'];
+            $groupedDeviceList[] = $rs['DeviceLists']['DeviceList']['GroupInfos']['GroupInfo'];
         }
-        foreach ($groupedDevices as $gd) {
+        foreach ($groupedDeviceList as $gd) {
             if(!empty($gd['GroupID']) && !empty($gd['GroupName']) && !empty($gd['GroupCapabilityValues'])) {
                 $devices[] = [
                     'DeviceID'      => $gd['GroupID'],
@@ -74,6 +75,12 @@ class Bridge extends BaseDevice
                     'productName'   => $gd['DeviceInfos']['DeviceInfo'][0]['productName'],
                     'IsGroupAction' => 'YES'
                 ];
+                if(isset($gd['DeviceInfos']) && isset($gd['DeviceInfos']['DeviceInfo'])){
+                    foreach($gd['DeviceInfos']['DeviceInfo'] as $gdi){
+                        $gdi['IsGroupAction'] = 'NO';
+                        $devices[] = $gdi;
+                    }
+                }
             }
         }
         return $devices;
