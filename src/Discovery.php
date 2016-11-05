@@ -22,6 +22,8 @@ class Discovery
     /** @type array */
     protected static $output = [];
 
+    public static $deviceFile = null;
+
     /**
      * Retrieves devices from cache. If not devices are found in cache
      * then finds/discovers Wemo devices in the network and returns them.
@@ -97,9 +99,9 @@ class Discovery
         $bridge = new Bridge('wemo_link');
         $devices = $bridge->getPairedDevices();
 
-        foreach($devices as $d){
-            if($id === $d['id']){
-                if($d['productName'] === 'Lighting'){
+        foreach ($devices as $d) {
+            if ($id === $d['id']) {
+                if ($d['productName'] === 'Lighting') {
                     return new WemoBulb('wemo_link', $id);
                 }
             }
@@ -189,7 +191,7 @@ class Discovery
     protected static function setDevicesInStorage($devices)
     {
         try {
-            $file = WS::config()->get('device_storage');
+            $file = (static::$deviceFile !== null) ? static::$deviceFile : WS::config()->get('device_storage');
             $json = json_encode($devices, JSON_UNESCAPED_SLASHES);
             @file_put_contents($file, $json);
 
