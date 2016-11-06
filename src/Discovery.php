@@ -88,6 +88,11 @@ class Discovery
     public static function getDeviceByName($name)
     {
         $id = str_replace(' ', '_', strtolower($name));
+        return static::getDeviceById($id);
+    }
+
+    public static function getDeviceById($id)
+    {
         $device = static::lookupDevice('id', $id);
         if (!empty($device) && isset($device['class_name'])) {
             $class = $device['class_name'];
@@ -107,7 +112,7 @@ class Discovery
             }
         }
 
-        throw new \Exception('Invalid device id supplied. No base device found by id ' . $name);
+        throw new \Exception('Invalid device id supplied. No base device found by id ' . $id);
     }
 
     /**
