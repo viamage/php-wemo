@@ -22,6 +22,8 @@ class Discovery
     /** @type array */
     protected static $output = [];
 
+    public static $deviceFile = null;
+
     /**
      * Retrieves devices from cache. If not devices are found in cache
      * then finds/discovers Wemo devices in the network and returns them.
@@ -86,6 +88,11 @@ class Discovery
     public static function getDeviceByName($name)
     {
         $id = str_replace(' ', '_', strtolower($name));
+        return static::getDeviceById($id);
+    }
+
+    public static function getDeviceById($id)
+    {
         $device = static::lookupDevice('id', $id);
         if (!empty($device) && isset($device['class_name'])) {
             $class = $device['class_name'];
@@ -97,15 +104,15 @@ class Discovery
         $bridge = new Bridge('wemo_link');
         $devices = $bridge->getPairedDevices();
 
-        foreach($devices as $d){
-            if($id === $d['id']){
-                if($d['productName'] === 'Lighting'){
+        foreach ($devices as $d) {
+            if ($id === $d['id']) {
+                if ($d['productName'] === 'Lighting') {
                     return new WemoBulb('wemo_link', $id);
                 }
             }
         }
 
-        throw new \Exception('Invalid device id supplied. No base device found by id ' . $name);
+        throw new \Exception('Invalid device id supplied. No base device found by id ' . $id);
     }
 
     /**
@@ -189,7 +196,7 @@ class Discovery
     protected static function setDevicesInStorage($devices)
     {
         try {
-            $file = WS::config()->get('device_storage');
+            $file = (static::$deviceFile !== null) ? static::$deviceFile : WS::config()->get('device_storage');
             $json = json_encode($devices, JSON_UNESCAPED_SLASHES);
             @file_put_contents($file, $json);
 
@@ -207,7 +214,7 @@ class Discovery
     protected static function getDevicesFromStorage()
     {
         try {
-            $file = WS::config()->get('device_storage');
+            $file = (static::$deviceFile !== null) ? static::$deviceFile : WS::config()->get('device_storage');
             $content = @file_get_contents($file);
             if (!empty($content)) {
                 $devices = json_decode($content, true);
