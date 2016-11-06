@@ -209,7 +209,7 @@ class Discovery
     protected static function getDevicesFromStorage()
     {
         try {
-            $file = WS::config()->get('device_storage');
+            $file = (static::$deviceFile !== null) ? static::$deviceFile : WS::config()->get('device_storage');
             $content = @file_get_contents($file);
             if (!empty($content)) {
                 $devices = json_decode($content, true);
