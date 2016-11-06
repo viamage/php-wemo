@@ -4,21 +4,21 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "5fcf4d31edca127a23cce4932049b484",
-    "content-hash": "99317ba7b4add0cc42d34513c5923468",
+    "hash": "64b5aca3d07cc90e9c9cdf25722f37c6",
+    "content-hash": "a35d35d3a3fc4aa291f112b78bf0a2fb",
     "packages": [
         {
             "name": "a15lam/workspace",
-            "version": "dev-develop",
+            "version": "dev-master",
             "source": {
                 "type": "git",
                 "url": "https://github.com/a15lam/workspace.git",
-                "reference": "61b48d63fae520e8cbed48a2ab7f874e641d9125"
+                "reference": "5f6b95db426e4033791970cb6b1714f7e80293b2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/a15lam/workspace/zipball/61b48d63fae520e8cbed48a2ab7f874e641d9125",
-                "reference": "61b48d63fae520e8cbed48a2ab7f874e641d9125",
+                "url": "https://api.github.com/repos/a15lam/workspace/zipball/5f6b95db426e4033791970cb6b1714f7e80293b2",
+                "reference": "5f6b95db426e4033791970cb6b1714f7e80293b2",
                 "shasum": ""
             },
             "require": {
@@ -47,7 +47,7 @@
                 "framework",
                 "utility"
             ],
-            "time": "2016-10-30 18:42:51"
+            "time": "2016-11-06 03:26:18"
         },
         {
             "name": "clue/multicast-react",
@@ -496,14 +496,7 @@
         }
     ],
     "packages-dev": [],
-    "aliases": [
-        {
-            "alias": "dev-master",
-            "alias_normalized": "9999999-dev",
-            "version": "dev-develop",
-            "package": "a15lam/workspace"
-        }
-    ],
+    "aliases": [],
     "minimum-stability": "stable",
     "stability-flags": {
         "a15lam/workspace": 20,
@@ -512,7 +505,7 @@
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
-        "php": ">=5.5"
+        "php": ">=5.6"
     },
     "platform-dev": []
 }
