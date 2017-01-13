@@ -130,17 +130,37 @@ class Discovery
 
     protected static function getClientByDevice($device)
     {
-        if(!isset($device['ip']) || !isset($device['port'])){
-            $sender = $device['_sender'];
-            $port = static::getPort($device['data']);
-            $ip = substr($sender, 0, strpos($sender, ':'));
-        } else {
-            $ip = $device['ip'];
-            $port = $device['port'];
-        }
+        $ip = static::getIpFromDevice($device);
+        $port = static::getPortFromDevice($device);
         $client = new WemoClient($ip, $port);
 
         return $client;
+    }
+
+    protected static function getIpFromDevice($device)
+    {
+        if(isset($device['ip'])){
+            return $device['ip'];
+        }
+        if(isset($device['_sender'])){
+            $sender = $device['_sender'];
+            $ip = substr($sender, 0, strpos($sender, ':'));
+            return $ip;
+        }
+
+        throw new \RuntimeException('No IP found for device ' . implode(', ', $device));
+    }
+
+    protected static function getPortFromDevice($device)
+    {
+        if(isset($device['port'])){
+            return $device['port'];
+        }
+        if(isset($device['data'])){
+            return static::getPort($device['data']);
+        }
+
+        throw new \RuntimeException('No Port found for device ' . implode(', ', $device));
     }
 
     /**
