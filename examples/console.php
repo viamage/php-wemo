@@ -23,8 +23,10 @@ if (count($devices) > 0) {
                     }
                 }
             } else {
+                $client = new \a15lam\PhpWemo\WemoClient($device['ip'], $device['port']);
                 $dc = $device['class_name'];
-                $di = new $dc($device['id']);
+                /** @var \a15lam\PhpWemo\Contracts\DeviceInterface $di */
+                $di = new $dc($device['id'], $client);
                 $list[] = [$device['id'], $di->state()];
             }
         }
@@ -100,8 +102,9 @@ if (count($devices) > 0) {
                 }
             }
         } else {
+            $client = new \a15lam\PhpWemo\WemoClient($device['ip'], $device['port']);
             /** @type \a15lam\PhpWemo\Contracts\DeviceInterface $myDevice */
-            $myDevice = new $deviceClass($chosen[0]);
+            $myDevice = new $deviceClass($chosen[0], $client);
 
             echo "\nOptions..." . PHP_EOL;
 

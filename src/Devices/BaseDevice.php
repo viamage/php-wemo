@@ -2,8 +2,8 @@
 
 namespace a15lam\PhpWemo\Devices;
 
+use a15lam\PhpWemo\Contracts\ClientInterface;
 use a15lam\PhpWemo\Discovery;
-use a15lam\PhpWemo\WemoClient;
 use a15lam\PhpWemo\Workspace as WS;
 
 /**
@@ -22,17 +22,19 @@ class BaseDevice
     /** @type array */
     protected $services = [];
 
+    protected $id = null;
+
     /**
      * BaseDevice constructor.
      *
      * @param string $id Device ip or id
-     * @param null   $port
+     * @param ClientInterface   $client
      */
-    public function __construct($id, $port = null)
+    public function __construct($id, $client)
     {
+        $this->id = $id;
         $this->ip = (self::isIp($id)) ? $id : static::getDeviceIpById($id);
-        $port = (!empty($port)) ? $port : WS::config()->get('port');
-        $this->client = new WemoClient($this->ip, $port);
+        $this->client = $client;
     }
 
     /**
@@ -60,7 +62,7 @@ class BaseDevice
             }
         }
 
-        $rs = $this->client->info('setup.xml');
+        $rs = $this->info();
 
         if (is_array($rs) && isset($rs['root'])) {
             return $rs['root']['device']['UDN'];
@@ -85,13 +87,19 @@ class BaseDevice
         ];
 
         $rs = $this->client->request($controlUrl, $service, $method, $arguments);
-        $rs = $this->unwrapResponse($rs);
+        if(!empty($rs)) {
+            $rs = $this->unwrapResponse($rs);
 
-        if (isset($rs['s:Fault'])) {
-            throw new \Exception('Failed to change switch state. ' . print_r($rs, true));
+            if (isset($rs['s:Fault'])) {
+                throw new \Exception('Failed to change switch state. ' . print_r($rs, true));
+            }
+
+            return $rs;
+        } else {
+            $this->saveState($state);
+
+            return true;
         }
-
-        return $rs;
     }
 
     /**
@@ -105,13 +113,18 @@ class BaseDevice
         $method = 'GetBinaryState';
 
         $rs = $this->client->request($controlUrl, $service, $method);
-        $rs = $this->unwrapResponse($rs);
 
-        if (isset($rs['s:Fault'])) {
-            throw new \Exception('Failed to change switch state. ' . print_r($rs, true));
+        if(!empty($rs)) {
+            $rs = $this->unwrapResponse($rs);
+
+            if (isset($rs['s:Fault'])) {
+                throw new \Exception('Failed to change switch state. ' . print_r($rs, true));
+            }
+
+            return $rs['u:GetBinaryStateResponse']['BinaryState'];
+        } else {
+            return $this->getState();
         }
-
-        return $rs['u:GetBinaryStateResponse']['BinaryState'];
     }
 
     /**
@@ -137,7 +150,7 @@ class BaseDevice
      *
      * @return bool
      */
-    protected static function isIp($ip)
+    public static function isIp($ip)
     {
         $segments = explode('.', $ip);
 
@@ -160,12 +173,54 @@ class BaseDevice
      * @return mixed
      * @throws \Exception
      */
-    protected static function getDeviceIpById($id)
+    public static function getDeviceIpById($id)
     {
         $device = Discovery::lookupDevice('id', $id);
         if (isset($device['ip'])) {
             return $device['ip'];
         }
         throw new \Exception('Invalid device id supplied. No device found by id ' . $id);
+    }
+
+    public function saveState($state)
+    {
+        try {
+            $data = [];
+            $file = (Discovery::$deviceFile !== null) ? Discovery::$deviceFile : WS::config()->get('device_storage');
+            $content = @file_get_contents($file);
+            if (!empty($content)) {
+                $data = json_decode($content, true);
+            }
+            if(!isset($data['state'])){
+                $data['state'] = [];
+            }
+            $data['state'][$this->id] = $state;
+            $json = json_encode($data, JSON_UNESCAPED_SLASHES);
+            @file_put_contents($file, $json);
+        } catch (\Exception $e){
+            return false;
+        }
+    }
+
+    public function getState($all = false)
+    {
+        $file = (Discovery::$deviceFile !== null) ? Discovery::$deviceFile : WS::config()->get('device_storage');
+        $content = @file_get_contents($file);
+        if (!empty($content)) {
+            $states = json_decode($content, true);
+            $states = (isset($states['state']))? $states['state'] : [];
+
+            if(true === $all) {
+                return $states;
+            }
+
+            return (isset($states[$this->id]))? $states[$this->id] : 0;
+        } else {
+            if(true === $all){
+                return [];
+            }
+
+            return 0;
+        }
     }
 }

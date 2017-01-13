@@ -3,6 +3,8 @@ namespace a15lam\PhpWemo\Devices;
 
 use a15lam\PhpWemo\Contracts\DeviceInterface;
 use a15lam\PhpWemo\Traits\Dimmable;
+use a15lam\PhpWemo\Discovery;
+use a15lam\PhpWemo\WemoClient;
 
 /**
  * Class WemoBulb
@@ -30,7 +32,10 @@ class WemoBulb implements DeviceInterface
      */
     public function __construct($bridgeId, $deviceId = null, $port = null)
     {
-        $this->bridge = new Bridge($bridgeId, $port);
+        $device = Discovery::lookupDevice('id', $bridgeId);
+        $ip = $device['ip'];
+        $port = (!empty($port))? $port : $device['port'];
+        $this->bridge = new Bridge($bridgeId, new WemoClient($ip, $port));
 
         if (!empty($deviceId)) {
             $this->deviceId = $this->bridge->getDeviceIdByCustomId($deviceId);
