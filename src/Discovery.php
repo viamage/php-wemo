@@ -1,6 +1,7 @@
 <?php
 namespace a15lam\PhpWemo;
 
+use a15lam\PhpWemo\Contracts\ClientInterface;
 use a15lam\PhpWemo\Contracts\DeviceInterface;
 use a15lam\PhpWemo\Devices\Bridge;
 use a15lam\PhpWemo\Devices\LightSwitch;
@@ -61,11 +62,17 @@ class Discovery
         return $devices;
     }
 
+    /**
+     * Discover all devices in network.
+     */
     protected static function findAllDevices()
     {
         static::findBelkinWemo();
     }
 
+    /**
+     * Discover all Belkin Wemo devices in network.
+     */
     protected static function findBelkinWemo()
     {
         $loop = Factory::create();
@@ -103,6 +110,12 @@ class Discovery
         return static::getDeviceById($id);
     }
 
+    /**
+     * @param $id
+     *
+     * @return \a15lam\PhpWemo\Devices\WemoBulb
+     * @throws \Exception
+     */
     public static function getDeviceById($id)
     {
         $device = static::lookupDevice('id', $id);
@@ -128,6 +141,11 @@ class Discovery
         throw new \Exception('Invalid device id supplied. No base device found by id ' . $id);
     }
 
+    /**
+     * @param $device
+     *
+     * @return \a15lam\PhpWemo\WemoClient
+     */
     protected static function getClientByDevice($device)
     {
         $ip = static::getIpFromDevice($device);
@@ -137,6 +155,11 @@ class Discovery
         return $client;
     }
 
+    /**
+     * @param $device
+     *
+     * @return string
+     */
     protected static function getIpFromDevice($device)
     {
         if(isset($device['ip'])){
@@ -151,6 +174,11 @@ class Discovery
         throw new \RuntimeException('No IP found for device ' . implode(', ', $device));
     }
 
+    /**
+     * @param $device
+     *
+     * @return string
+     */
     protected static function getPortFromDevice($device)
     {
         if(isset($device['port'])){
@@ -200,7 +228,7 @@ class Discovery
             $port = static::getPort($device['data']);
             $ip = substr($sender, 0, strpos($sender, ':'));
             $client = static::getClientByDevice($device);
-            $info = $client->info('setup.xml');
+            $info = static::getClientInfo($client);
             $info = $info['root']['device'];
 
             // Skipping emulated wemo switch by fauxmo.
@@ -233,6 +261,8 @@ class Discovery
                     $data['class_name'] = WemoSwitch::class;
                 } else if (static::isInsightSwitch($info['UDN'])) {
                     $data['class_name'] = InsightSwitch::class;
+                } else {
+                    static::resolveOtherDevices($data, $info, $device);
                 }
 
                 $infos[] = $data;
@@ -242,6 +272,31 @@ class Discovery
         return $infos;
     }
 
+    /**
+     * @param array $data
+     * @param array $info
+     * @param array $device
+     */
+    protected static function resolveOtherDevices(& $data, $info, $device)
+    {
+        // Overwrite this class for adding other devices.
+    }
+
+    /**
+     * @param ClientInterface $client
+     *
+     * @return mixed
+     */
+    protected static function getClientInfo($client)
+    {
+        return $client->info('setup.xml');
+    }
+
+    /**
+     * @param $data
+     *
+     * @return string
+     */
     protected static function getPort($data)
     {
         $pieces = explode('LOCATION:', $data);
