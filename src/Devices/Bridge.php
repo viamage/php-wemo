@@ -12,6 +12,8 @@ use a15lam\PhpWemo\WemoClient;
  */
 class Bridge extends BaseDevice
 {
+    const MODEL_NAME = 'Bridge';
+
     protected $services = [
         'BridgeService' => [
             'serviceType' => 'urn:Belkin:service:bridge:1',

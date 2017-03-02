@@ -11,6 +11,8 @@ use a15lam\PhpWemo\Contracts\DeviceInterface;
  */
 class LightSwitch extends BaseDevice implements DeviceInterface
 {
+    const MODEL_NAME = 'LightSwitch';
+
     protected $services = [
         'BridgeService' => [
             'serviceType' => 'urn:Belkin:service:basicevent:1',

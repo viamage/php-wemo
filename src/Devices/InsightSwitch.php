@@ -11,6 +11,8 @@ use a15lam\PhpWemo\Contracts\DeviceInterface;
  */
 class InsightSwitch extends WemoSwitch implements DeviceInterface
 {
+    const MODEL_NAME = 'Insight';
+
     protected $services = [
         'BridgeService' => [
             'serviceType' => 'urn:Belkin:service:basicevent:1',

@@ -244,7 +244,7 @@ class Discovery
                     'UDN'          => $info['UDN']
                 ];
 
-                if (static::isBridge($info['UDN'])) {
+                if (static::isBridge($info['modelName'])) {
                     $bridge = new Bridge($ip, $client);
                     $bridgeDevices = $bridge->getPairedDevices(true);
 
@@ -255,11 +255,11 @@ class Discovery
 
                     $data['class_name'] = Bridge::class;
                     $data['device'] = $bridgeDevices;
-                } else if (static::isLightSwitch($info['UDN'])) {
+                } else if (static::isLightSwitch($info['modelName'])) {
                     $data['class_name'] = LightSwitch::class;
-                } else if (static::isWemoSwitch($info['UDN'])) {
+                } else if (static::isWemoSwitch($info['modelName'])) {
                     $data['class_name'] = WemoSwitch::class;
-                } else if (static::isInsightSwitch($info['UDN'])) {
+                } else if (static::isInsightSwitch($info['modelName'])) {
                     $data['class_name'] = InsightSwitch::class;
                 } else {
                     static::resolveOtherDevices($data, $info, $device);
@@ -364,13 +364,13 @@ class Discovery
     /**
      * Checks to see if UDN is for a bridge device.
      *
-     * @param $udn string
+     * @param $modelName string
      *
      * @return bool
      */
-    protected static function isBridge($udn)
+    protected static function isBridge($modelName)
     {
-        if (strpos($udn, 'uuid:Bridge-1') !== false) {
+        if ($modelName === Bridge::MODEL_NAME) {
             return true;
         }
 
@@ -380,13 +380,13 @@ class Discovery
     /**
      * Checks to see if UDN is for a LightSwitch device.
      *
-     * @param $udn string
+     * @param $modelName string
      *
      * @return bool
      */
-    protected static function isLightSwitch($udn)
+    protected static function isLightSwitch($modelName)
     {
-        if (strpos($udn, 'uuid:Lightswitch-1') !== false) {
+        if ($modelName === LightSwitch::MODEL_NAME) {
             return true;
         }
 
@@ -396,13 +396,13 @@ class Discovery
     /**
      * Checks to see if UDN is for a InsightSwitch device.
      *
-     * @param $udn string
+     * @param $modelName string
      *
      * @return bool
      */
-    protected static function isInsightSwitch($udn)
+    protected static function isInsightSwitch($modelName)
     {
-        if (strpos($udn, 'uuid:Insight-1') !== false) {
+        if ($modelName === InsightSwitch::MODEL_NAME) {
             return true;
         }
 
@@ -412,13 +412,13 @@ class Discovery
     /**
      * Checks to see if UDN is for a WemoSwitch device.
      *
-     * @param $udn string
+     * @param $modelName string
      *
      * @return bool
      */
-    protected static function isWemoSwitch($udn)
+    protected static function isWemoSwitch($modelName)
     {
-        if (strpos($udn, 'uuid:Socket-1') !== false) {
+        if ($modelName === WemoSwitch::MODEL_NAME) {
             return true;
         }
 

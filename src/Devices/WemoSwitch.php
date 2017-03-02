@@ -11,6 +11,8 @@ use a15lam\PhpWemo\Contracts\DeviceInterface;
  */
 class WemoSwitch extends BaseDevice implements DeviceInterface
 {
+    const MODEL_NAME = 'Socket';
+
     protected $services = [
         'BridgeService' => [
             'serviceType' => 'urn:Belkin:service:basicevent:1',
