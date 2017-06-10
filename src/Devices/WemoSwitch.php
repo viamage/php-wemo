@@ -13,6 +13,8 @@ class WemoSwitch extends BaseDevice implements DeviceInterface
 {
     const MODEL_NAME = 'Socket';
 
+    const EMULATED_NAME = 'Emulated Socket';
+
     protected $services = [
         'BridgeService' => [
             'serviceType' => 'urn:Belkin:service:basicevent:1',
