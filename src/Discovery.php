@@ -77,7 +77,7 @@ class Discovery
     {
         $loop = Factory::create();
         $client = new Client($loop);
-        $client->search('urn:Belkin:service:basicevent:1', 2)->then(
+        $client->search('urn:Belkin:device:**', 2)->then(
             function (){
                 if (WS::config()->get('debug') === true) {
                     echo 'Search completed' . PHP_EOL;
@@ -261,6 +261,8 @@ class Discovery
                     $data['class_name'] = WemoSwitch::class;
                 } else if (static::isInsightSwitch($info['modelName'])) {
                     $data['class_name'] = InsightSwitch::class;
+                } else if (static::isEmulatedWemoSwitch($info['modelName'])) {
+                    $data['class_name'] = WemoSwitch::class;
                 } else {
                     static::resolveOtherDevices($data, $info, $device);
                 }
@@ -419,6 +421,22 @@ class Discovery
     protected static function isWemoSwitch($modelName)
     {
         if ($modelName === WemoSwitch::MODEL_NAME) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Checks to see if UDN is for a Emulated WemoSwitch device.
+     *
+     * @param $modelName string
+     *
+     * @return bool
+     */
+    protected static function isEmulatedWemoSwitch($modelName)
+    {
+        if ($modelName === WemoSwitch::EMULATED_NAME) {
             return true;
         }
 
